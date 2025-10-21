@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punjab Digital Learning - Lesson Player</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .punjabi-text {
+            font-family: 'Noto Sans Gurmukhi', sans-serif;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #E9ECEF;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .notes-area {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .bookmark-btn {
+            transition: all 0.2s ease;
+        }
+        .bookmark-btn.active {
+            color: #FF8500;
+        }
+        .progress-circle {
+            transform: rotate(-90deg);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .lesson-nav-btn {
+            transition: all 0.2s ease;
+        }
+        .lesson-nav-btn:hover {
+            transform: translateY(-1px);
+        }
+        .lesson-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .content-tab {
+            transition: all 0.2s ease;
+        }
+        .content-tab.active {
+            border-bottom: 2px solid #1B4332;
+            color: #1B4332;
+        }
+        .note-item {
+            transition: all 0.2s ease;
+        }
+        .note-item:hover {
+            background-color: #F8F9FA;
+        }
+    </style>
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fpunjabdig9195back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="bg-gradient-to-br from-primary-50 to-accent-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-border sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo and Title -->
+                <div class="flex items-center gap-4">
+                    <button id="backBtn" class="touch-target text-text-secondary hover:text-primary transition-colors duration-200 lg:hidden">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <div class="hidden sm:block">
+                            <h1 id="headerTitle" class="text-fluid-lg font-semibold text-text-primary">Punjab Digital Learning</h1>
+                            <p id="headerSubtitle" class="text-xs text-text-secondary">Lesson Player</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Header Actions -->
+                <div class="flex items-center gap-3">
+                    <!-- Language Toggle -->
+                    <button id="languageToggle" class="touch-target bg-surface border border-border rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors duration-200">
+                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=100&auto=format&fit=crop" alt="Language" class="w-4 h-4 rounded-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'; this.onerror=null;" />
+                        <span id="languageText" class="text-sm font-medium text-text-primary hidden sm:inline">ਪੰਜਾਬੀ</span>
+                    </button>
+
+                    <!-- Bookmark Button -->
+                    <button id="bookmarkBtn" class="bookmark-btn touch-target text-text-secondary hover:text-secondary transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Dashboard Link -->
+                    <a href="student_dashboard.html" class="touch-target bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors duration-200">
+                        <span id="dashboardText">Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Video and Content Section -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Lesson Progress -->
+                <div class="bg-white rounded-lg shadow-sm border border-border p-4 fade-in">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 id="progressTitle" class="text-sm font-medium text-text-primary">Lesson Progress</h3>
+                        <span id="progressText" class="text-sm text-text-secondary">3 of 8 lessons</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="lessonProgressBar" class="progress-fill" style="width: 37.5%"></div>
+                    </div>
+                </div>
+
+                <!-- Content Tabs -->
+                <div class="bg-white rounded-lg shadow-sm border border-border fade-in">
+                    <div class="border-b border-border">
+                        <nav class="flex space-x-8 px-6">
+                            <button id="videoTab" class="content-tab active py-4 px-1 text-sm font-medium text-text-secondary border-b-2 border-transparent">
+                                <span id="videoTabText">Video Lesson</span>
+                            </button>
+                            <button id="pdfTab" class="content-tab py-4 px-1 text-sm font-medium text-text-secondary border-b-2 border-transparent">
+                                <span id="pdfTabText">Study Material</span>
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Video Content -->
+                    <div id="videoContent" class="p-6">
+                        <div class="video-container mb-6">
+                            <video id="lessonVideo" controls preload="metadata" poster="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+                                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                                <p id="videoNotSupported" class="text-center text-text-secondary py-8">Your browser does not support the video tag.</p>
+                            </video>
+                        </div>
+
+                        <!-- Video Controls Info -->
+                        <div class="bg-surface rounded-lg p-4 mb-4">
+                            <div class="flex items-center gap-4 text-sm text-text-secondary">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span id="playPauseText">Play/Pause</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.824L4.5 13.5H2a1 1 0 01-1-1V7.5a1 1 0 011-1h2.5l3.883-3.324z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span id="volumeText">Volume Control</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 3a1 1 0 000 2h.01a1 1 0 100-2H5zm4 0a1 1 0 000 2h.01a1 1 0 100-2H9zm4 0a1 1 0 000 2h.01a1 1 0 100-2H13z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span id="fullscreenText">Fullscreen</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lesson Metadata -->
+                        <div class="space-y-4">
+                            <div>
+                                <h2 id="lessonTitle" class="text-fluid-xl font-semibold text-text-primary mb-2">Introduction to Plant Biology</h2>
+                                <div class="flex items-center gap-4 text-sm text-text-secondary mb-4">
+                                    <span id="lessonDuration" class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                        </svg>
+                                        15 minutes
+                                    </span>
+                                    <span id="lessonGrade" class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Grade 6 Science
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 id="descriptionTitle" class="text-sm font-medium text-text-primary mb-2">Description</h3>
+                                <p id="lessonDescription" class="text-sm text-text-secondary leading-relaxed">
+                                    This lesson introduces students to the fascinating world of plant biology. We'll explore the basic structure of plants, their life processes, and how they contribute to our ecosystem. Students will learn about photosynthesis, plant reproduction, and the importance of plants in our daily lives.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h3 id="objectivesTitle" class="text-sm font-medium text-text-primary mb-2">Learning Objectives</h3>
+                                <ul id="learningObjectives" class="text-sm text-text-secondary space-y-1">
+                                    <li class="flex items-start gap-2">
+                                        <svg class="w-4 h-4 text-success mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Understand the basic structure of plants</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <svg class="w-4 h-4 text-success mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Learn about photosynthesis process</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <svg class="w-4 h-4 text-success mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Identify different types of plants</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PDF Content -->
+                    <div id="pdfContent" class="p-6 hidden">
+                        <div class="mb-4">
+                            <h3 id="pdfTitle" class="text-fluid-lg font-semibold text-text-primary mb-2">Study Material - Plant Biology</h3>
+                            <p id="pdfDescription" class="text-sm text-text-secondary">Supplementary reading material and diagrams to enhance your understanding.</p>
+                        </div>
+                        
+                        <div class="pdf-viewer flex items-center justify-center">
+                            <div class="text-center">
+                                <svg class="w-16 h-16 text-text-secondary mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                                </svg>
+                                <h4 id="pdfPlaceholderTitle" class="text-lg font-medium text-text-primary mb-2">PDF Viewer</h4>
+                                <p id="pdfPlaceholderText" class="text-text-secondary mb-4">Plant Biology Study Guide would be displayed here</p>
+                                <button id="downloadPdfBtn" class="bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent-600 transition-colors duration-200">
+                                    <span id="downloadText">Download PDF</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson Navigation -->
+                <div class="bg-white rounded-lg shadow-sm border border-border p-6 fade-in">
+                    <div class="flex items-center justify-between">
+                        <button id="prevLessonBtn" class="lesson-nav-btn flex items-center gap-2 bg-surface text-text-primary px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            <span id="prevLessonText">Previous Lesson</span>
+                        </button>
+
+                        <div class="text-center">
+                            <p id="currentLessonText" class="text-sm text-text-secondary">Lesson 3 of 8</p>
+                            <h4 id="currentLessonTitle" class="text-sm font-medium text-text-primary">Introduction to Plant Biology</h4>
+                        </div>
+
+                        <button id="nextLessonBtn" class="lesson-nav-btn flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-all duration-200">
+                            <span id="nextLessonText">Next Lesson</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Subject Progress -->
+                <div class="bg-white rounded-lg shadow-sm border border-border p-6 fade-in">
+                    <div class="text-center mb-4">
+                        <h3 id="subjectProgressTitle" class="text-sm font-medium text-text-primary mb-2">Science Progress</h3>
+                        <div class="relative inline-flex items-center justify-center">
+                            <svg class="w-20 h-20 progress-circle">
+                                <circle cx="40" cy="40" r="36" stroke="#E9ECEF" stroke-width="8" fill="transparent"/>
+                                <circle cx="40" cy="40" r="36" stroke="#1B4332" stroke-width="8" fill="transparent" stroke-dasharray="226.2" stroke-dashoffset="135.7" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-lg font-semibold text-primary">40%</span>
+                            </div>
+                        </div>
+                        <p id="subjectProgressText" class="text-xs text-text-secondary mt-2">3 of 8 lessons completed</p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span id="completedText" class="text-text-secondary">Completed</span>
+                            <span class="text-success font-medium">3 lessons</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span id="remainingText" class="text-text-secondary">Remaining</span>
+                            <span class="text-text-secondary">5 lessons</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-sm border border-border p-6 fade-in">
+                    <h3 id="quickActionsTitle" class="text-sm font-medium text-text-primary mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="quiz_interface.html" class="block w-full bg-accent text-white text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-accent-600 transition-colors duration-200">
+                            <span id="takeQuizText">Take Quiz</span>
+                        </a>
+                        <button id="markCompleteBtn" class="w-full bg-success text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-success-600 transition-colors duration-200">
+                            <span id="markCompleteText">Mark as Complete</span>
+                        </button>
+                        <a href="subject_selection.html" class="block w-full bg-surface text-text-primary text-center py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200">
+                            <span id="backToSubjectsText">Back to Subjects</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="bg-white rounded-lg shadow-sm border border-border p-6 fade-in">
+                    <h3 id="notesTitle" class="text-sm font-medium text-text-primary mb-4">My Notes</h3>
+                    
+                    <!-- Add Note -->
+                    <div class="mb-4">
+                        <textarea id="noteInput" class="notes-area w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent resize-none" placeholder="Add your notes here..." rows="3"></textarea>
+                        <button id="addNoteBtn" class="mt-2 w-full bg-primary text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors duration-200">
+                            <span id="addNoteText">Add Note</span>
+                        </button>
+                    </div>
+
+                    <!-- Notes List -->
+                    <div id="notesList" class="space-y-2 max-h-60 overflow-y-auto">
+                        <div class="note-item p-3 bg-surface rounded-lg">
+                            <p class="text-sm text-text-primary mb-1">Photosynthesis converts sunlight into energy for plants.</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-text-secondary">2 minutes ago</span>
+                                <button class="delete-note text-error hover:text-error-600 transition-colors duration-200">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 5.707 7.293a1 1 0 00-1.414 1.414L7.586 12l-3.293 3.293a1 1 0 101.414 1.414L9 13.414l3.293 3.293a1 1 0 001.414-1.414L10.414 12l3.293-3.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div id="messageBox" class="bg-white border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80">
+            <div id="messageIcon" class="flex-shrink-0"></div>
+            <div>
+                <p id="messageText" class="text-sm font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                headerTitle: "Punjab Digital Learning",
+                headerSubtitle: "Lesson Player",
+                languageText: "ਪੰਜਾਬੀ",
+                dashboardText: "Dashboard",
+                progressTitle: "Lesson Progress",
+                progressText: "3 of 8 lessons",
+                videoTabText: "Video Lesson",
+                pdfTabText: "Study Material",
+                videoNotSupported: "Your browser does not support the video tag.",
+                playPauseText: "Play/Pause",
+                volumeText: "Volume Control",
+                fullscreenText: "Fullscreen",
+                lessonTitle: "Introduction to Plant Biology",
+                lessonDuration: "15 minutes",
+                lessonGrade: "Grade 6 Science",
+                descriptionTitle: "Description",
+                lessonDescription: "This lesson introduces students to the fascinating world of plant biology. We'll explore the basic structure of plants, their life processes, and how they contribute to our ecosystem. Students will learn about photosynthesis, plant reproduction, and the importance of plants in our daily lives.",
+                objectivesTitle: "Learning Objectives",
+                pdfTitle: "Study Material - Plant Biology",
+                pdfDescription: "Supplementary reading material and diagrams to enhance your understanding.",
+                pdfPlaceholderTitle: "PDF Viewer",
+                pdfPlaceholderText: "Plant Biology Study Guide would be displayed here",
+                downloadText: "Download PDF",
+                prevLessonText: "Previous Lesson",
+                nextLessonText: "Next Lesson",
+                currentLessonText: "Lesson 3 of 8",
+                currentLessonTitle: "Introduction to Plant Biology",
+                subjectProgressTitle: "Science Progress",
+                subjectProgressText: "3 of 8 lessons completed",
+                completedText: "Completed",
+                remainingText: "Remaining",
+                quickActionsTitle: "Quick Actions",
+                takeQuizText: "Take Quiz",
+                markCompleteText: "Mark as Complete",
+                backToSubjectsText: "Back to Subjects",
+                notesTitle: "My Notes",
+                addNoteText: "Add Note"
+            },
+            pa: {
+                headerTitle: "ਪੰਜਾਬ ਡਿਜੀਟਲ ਸਿੱਖਿਆ",
+                headerSubtitle: "ਪਾਠ ਪਲੇਅਰ",
+                languageText: "English",
+                dashboardText: "ਡੈਸ਼ਬੋਰਡ",
+                progressTitle: "ਪਾਠ ਦੀ ਪ੍ਰਗਤੀ",
+                progressText: "8 ਵਿੱਚੋਂ 3 ਪਾਠ",
+                videoTabText: "ਵੀਡੀਓ ਪਾਠ",
+                pdfTabText: "ਅਧਿਐਨ ਸਮੱਗਰੀ",
+                videoNotSupported: "ਤੁਹਾਡਾ ਬ੍ਰਾਊਜ਼ਰ ਵੀਡੀਓ ਟੈਗ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ।",
+                playPauseText: "ਚਲਾਓ/ਰੋਕੋ",
+                volumeText: "ਆਵਾਜ਼ ਨਿਯੰਤਰਣ",
+                fullscreenText: "ਪੂਰੀ ਸਕ੍ਰੀਨ",
+                lessonTitle: "ਪੌਧਿਆਂ ਦੇ ਜੀਵ ਵਿਗਿਆਨ ਦੀ ਜਾਣ-ਪਛਾਣ",
+                lessonDuration: "15 ਮਿੰਟ",
+                lessonGrade: "ਕਲਾਸ 6 ਵਿਗਿਆਨ",
+                descriptionTitle: "ਵਰਣਨ",
+                lessonDescription: "ਇਹ ਪਾਠ ਵਿਦਿਆਰਥੀਆਂ ਨੂੰ ਪੌਧਿਆਂ ਦੇ ਜੀਵ ਵਿਗਿਆਨ ਦੀ ਦਿਲਚਸਪ ਦੁਨੀਆ ਨਾਲ ਜਾਣੂ ਕਰਵਾਉਂਦਾ ਹੈ। ਅਸੀਂ ਪੌਧਿਆਂ ਦੀ ਬੁਨਿਆਦੀ ਬਣਤਰ, ਉਨ੍ਹਾਂ ਦੀਆਂ ਜੀਵਨ ਪ੍ਰਕਿਰਿਆਵਾਂ, ਅਤੇ ਸਾਡੇ ਵਾਤਾਵਰਣ ਵਿੱਚ ਉਨ੍ਹਾਂ ਦੇ ਯੋਗਦਾਨ ਦੀ ਖੋਜ ਕਰਾਂਗੇ।",
+                objectivesTitle: "ਸਿੱਖਣ ਦੇ ਉਦੇਸ਼",
+                pdfTitle: "ਅਧਿਐਨ ਸਮੱਗਰੀ - ਪੌਧਿਆਂ ਦਾ ਜੀਵ ਵਿਗਿਆਨ",
+                pdfDescription: "ਤੁਹਾਡੀ ਸਮਝ ਨੂੰ ਵਧਾਉਣ ਲਈ ਪੂਰਕ ਪੜ੍ਹਨ ਦੀ ਸਮੱਗਰੀ ਅਤੇ ਚਿੱਤਰ।",
+                pdfPlaceholderTitle: "PDF ਦਰਸ਼ਕ",
+                pdfPlaceholderText: "ਪੌਧਿਆਂ ਦੇ ਜੀਵ ਵਿਗਿਆਨ ਦੀ ਅਧਿਐਨ ਗਾਈਡ ਇੱਥੇ ਦਿਖਾਈ ਜਾਵੇਗੀ",
+                downloadText: "PDF ਡਾਊਨਲੋਡ ਕਰੋ",
+                prevLessonText: "ਪਿਛਲਾ ਪਾਠ",
+                nextLessonText: "ਅਗਲਾ ਪਾਠ",
+                currentLessonText: "8 ਵਿੱਚੋਂ ਪਾਠ 3",
+                currentLessonTitle: "ਪੌਧਿਆਂ ਦੇ ਜੀਵ ਵਿਗਿਆਨ ਦੀ ਜਾਣ-ਪਛਾਣ",
+                subjectProgressTitle: "ਵਿਗਿਆਨ ਦੀ ਪ੍ਰਗਤੀ",
+                subjectProgressText: "8 ਵਿੱਚੋਂ 3 ਪਾਠ ਪੂਰੇ ਹੋਏ",
+                completedText: "ਪੂਰੇ ਹੋਏ",
+                remainingText: "ਬਾਕੀ",
+                quickActionsTitle: "ਤੁਰੰਤ ਕਾਰਵਾਈਆਂ",
+                takeQuizText: "ਕੁਇਜ਼ ਲਓ",
+                markCompleteText: "ਪੂਰਾ ਹੋਇਆ ਮਾਰਕ ਕਰੋ",
+                backToSubjectsText: "ਵਿਸ਼ਿਆਂ ਵਿੱਚ ਵਾਪਸ",
+                notesTitle: "ਮੇਰੇ ਨੋਟਸ",
+                addNoteText: "ਨੋਟ ਸ਼ਾਮਲ ਕਰੋ"
+            }
+        };
+
+        let currentLanguage = 'en';
+        let isBookmarked = false;
+        let currentLesson = 3;
+        let totalLessons = 8;
+        let lessonCompleted = false;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            if (localStorage.getItem('userLoggedIn') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadUserProgress();
+            loadBookmarkStatus();
+            loadUserNotes();
+            updateProgressBars();
+        });
+
+        // Language toggle functionality
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'pa' : 'en';
+            updateLanguage();
+        });
+
+        function updateLanguage() {
+            const elements = translations[currentLanguage];
+            
+            Object.keys(elements).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = elements[key];
+                    } else {
+                        element.textContent = elements[key];
+                    }
+                    
+                    if (currentLanguage === 'pa') {
+                        element.classList.add('punjabi-text');
+                    } else {
+                        element.classList.remove('punjabi-text');
+                    }
+                }
+            });
+        }
+
+        // Content tab switching
+        document.getElementById('videoTab').addEventListener('click', function() {
+            switchContentTab('video');
+        });
+
+        document.getElementById('pdfTab').addEventListener('click', function() {
+            switchContentTab('pdf');
+        });
+
+        function switchContentTab(tabType) {
+            const videoTab = document.getElementById('videoTab');
+            const pdfTab = document.getElementById('pdfTab');
+            const videoContent = document.getElementById('videoContent');
+            const pdfContent = document.getElementById('pdfContent');
+
+            if (tabType === 'video') {
+                videoTab.classList.add('active');
+                pdfTab.classList.remove('active');
+                videoContent.classList.remove('hidden');
+                pdfContent.classList.add('hidden');
+            } else {
+                pdfTab.classList.add('active');
+                videoTab.classList.remove('active');
+                pdfContent.classList.remove('hidden');
+                videoContent.classList.add('hidden');
+            }
+        }
+
+        // Bookmark functionality
+        document.getElementById('bookmarkBtn').addEventListener('click', function() {
+            isBookmarked = !isBookmarked;
+            updateBookmarkStatus();
+            saveBookmarkStatus();
+            
+            const message = isBookmarked ? 'Lesson bookmarked!' : 'Bookmark removed!';
+            showMessage(message, 'success');
+        });
+
+        function updateBookmarkStatus() {
+            const bookmarkBtn = document.getElementById('bookmarkBtn');
+            if (isBookmarked) {
+                bookmarkBtn.classList.add('active');
+                bookmarkBtn.innerHTML = `
+                    <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                    </svg>
+                `;
+            } else {
+                bookmarkBtn.classList.remove('active');
+                bookmarkBtn.innerHTML = `
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                    </svg>
+                `;
+            }
+        }
+
+        // Lesson navigation
+        document.getElementById('prevLessonBtn').addEventListener('click', function() {
+            if (currentLesson > 1) {
+                currentLesson--;
+                updateLessonNavigation();
+                showMessage('Loading previous lesson...', 'success');
+            }
+        });
+
+        document.getElementById('nextLessonBtn').addEventListener('click', function() {
+            if (currentLesson < totalLessons) {
+                currentLesson++;
+                updateLessonNavigation();
+                showMessage('Loading next lesson...', 'success');
+            }
+        });
+
+        function updateLessonNavigation() {
+            const prevBtn = document.getElementById('prevLessonBtn');
+            const nextBtn = document.getElementById('nextLessonBtn');
+            const currentText = document.getElementById('currentLessonText');
+            const progressText = document.getElementById('progressText');
+            const progressBar = document.getElementById('lessonProgressBar');
+
+            prevBtn.disabled = currentLesson === 1;
+            nextBtn.disabled = currentLesson === totalLessons;
+
+            currentText.textContent = `Lesson ${currentLesson} of ${totalLessons}`;
+            progressText.textContent = `${currentLesson} of ${totalLessons} lessons`;
+            
+            const progressPercentage = (currentLesson / totalLessons) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            updateProgressBars();
+        }
+
+        // Mark lesson as complete
+        document.getElementById('markCompleteBtn').addEventListener('click', function() {
+            lessonCompleted = true;
+            saveUserProgress();
+            updateProgressBars();
+            showMessage('Lesson marked as complete!', 'success');
+            
+            // Update button text
+            this.innerHTML = `
+                <svg class="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Completed</span>
+            `;
+            this.disabled = true;
+            this.classList.remove('hover:bg-success-600');
+            this.classList.add('opacity-75');
+        });
+
+        // Notes functionality
+        document.getElementById('addNoteBtn').addEventListener('click', function() {
+            const noteInput = document.getElementById('noteInput');
+            const noteText = noteInput.value.trim();
+            
+            if (noteText) {
+                addNote(noteText);
+                noteInput.value = '';
+                showMessage('Note added successfully!', 'success');
+            }
+        });
+
+        function addNote(text) {
+            const notesList = document.getElementById('notesList');
+            const noteId = Date.now();
+            
+            const noteElement = document.createElement('div');
+            noteElement.className = 'note-item p-3 bg-surface rounded-lg';
+            noteElement.innerHTML = `
+                <p class="text-sm text-text-primary mb-1">${text}</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-text-secondary">Just now</span>
+                    <button class="delete-note text-error hover:text-error-600 transition-colors duration-200" data-note-id="${noteId}">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 5.707 7.293a1 1 0 00-1.414 1.414L7.586 12l-3.293 3.293a1 1 0 101.414 1.414L9 13.414l3.293 3.293a1 1 0 001.414-1.414L10.414 12l3.293-3.293z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            notesList.insertBefore(noteElement, notesList.firstChild);
+            
+            // Add delete functionality
+            noteElement.querySelector('.delete-note').addEventListener('click', function() {
+                noteElement.remove();
+                saveUserNotes();
+                showMessage('Note deleted!', 'success');
+            });
+            
+            saveUserNotes();
+        }
+
+        // Video player event listeners
+        const video = document.getElementById('lessonVideo');
+        video.addEventListener('loadedmetadata', function() {
+            console.log('Video loaded successfully');
+        });
+
+        video.addEventListener('ended', function() {
+            showMessage('Video completed! Consider taking the quiz.', 'success');
+        });
+
+        // Back button functionality
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.history.back();
+        });
+
+        // PDF download functionality
+        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+            showMessage('PDF download started...', 'success');
+            // In a real application, this would trigger an actual download
+        });
+
+        // Progress bar updates
+        function updateProgressBars() {
+            const completedLessons = lessonCompleted ? currentLesson : currentLesson - 1;
+            const progressPercentage = (completedLessons / totalLessons) * 100;
+            
+            // Update circular progress
+            const circle = document.querySelector('.progress-circle circle:last-child');
+            const circumference = 2 * Math.PI * 36;
+            const offset = circumference - (progressPercentage / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            // Update percentage text
+            document.querySelector('.progress-circle + div span').textContent = `${Math.round(progressPercentage)}%`;
+            
+            // Update progress text
+            document.getElementById('subjectProgressText').textContent = `${completedLessons} of ${totalLessons} lessons completed`;
+        }
+
+        // Local storage functions
+        function saveUserProgress() {
+            const progress = {
+                currentLesson: currentLesson,
+                totalLessons: totalLessons,
+                lessonCompleted: lessonCompleted,
+                subject: 'Science',
+                lastAccessed: new Date().toISOString()
+            };
+            localStorage.setItem('lessonProgress', JSON.stringify(progress));
+        }
+
+        function loadUserProgress() {
+            const saved = localStorage.getItem('lessonProgress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                currentLesson = progress.currentLesson || 3;
+                totalLessons = progress.totalLessons || 8;
+                lessonCompleted = progress.lessonCompleted || false;
+                updateLessonNavigation();
+            }
+        }
+
+        function saveBookmarkStatus() {
+            localStorage.setItem('lessonBookmarked', isBookmarked.toString());
+        }
+
+        function loadBookmarkStatus() {
+            const saved = localStorage.getItem('lessonBookmarked');
+            if (saved) {
+                isBookmarked = saved === 'true';
+                updateBookmarkStatus();
+            }
+        }
+
+        function saveUserNotes() {
+            const notes = [];
+            document.querySelectorAll('.note-item').forEach(note => {
+                const text = note.querySelector('p').textContent;
+                const time = note.querySelector('.text-xs').textContent;
+                notes.push({ text, time });
+            });
+            localStorage.setItem('lessonNotes', JSON.stringify(notes));
+        }
+
+        function loadUserNotes() {
+            const saved = localStorage.getItem('lessonNotes');
+            if (saved) {
+                const notes = JSON.parse(saved);
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = ''; // Clear existing notes
+                
+                notes.forEach(note => {
+                    addNoteToDOM(note.text, note.time);
+                });
+            }
+        }
+
+        function addNoteToDOM(text, time) {
+            const notesList = document.getElementById('notesList');
+            const noteId = Date.now();
+            
+            const noteElement = document.createElement('div');
+            noteElement.className = 'note-item p-3 bg-surface rounded-lg';
+            noteElement.innerHTML = `
+                <p class="text-sm text-text-primary mb-1">${text}</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-text-secondary">${time}</span>
+                    <button class="delete-note text-error hover:text-error-600 transition-colors duration-200" data-note-id="${noteId}">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 5.707 7.293a1 1 0 00-1.414 1.414L7.586 12l-3.293 3.293a1 1 0 101.414 1.414L9 13.414l3.293 3.293a1 1 0 001.414-1.414L10.414 12l3.293-3.293z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            notesList.appendChild(noteElement);
+            
+            // Add delete functionality
+            noteElement.querySelector('.delete-note').addEventListener('click', function() {
+                noteElement.remove();
+                saveUserNotes();
+                showMessage('Note deleted!', 'success');
+            });
+        }
+
+        function showMessage(text, type) {
+            const container = document.getElementById('messageContainer');
+            const messageBox = document.getElementById('messageBox');
+            const messageIcon = document.getElementById('messageIcon');
+            const messageText = document.getElementById('messageText');
+
+            messageText.textContent = text;
+
+            if (type === 'success') {
+                messageBox.className = 'bg-success-50 border border-success-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-success-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-success-800';
+            } else {
+                messageBox.className = 'bg-error-50 border border-error-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-error-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-error-800';
+            }
+
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Auto-save progress periodically
+        setInterval(saveUserProgress, 30000); // Save every 30 seconds
+    </script>
+</body>
+</html>

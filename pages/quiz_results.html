@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Results - Punjab Digital Learning</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .punjabi-text {
+            font-family: 'Noto Sans Gurmukhi', sans-serif;
+        }
+        .language-toggle {
+            transition: all 0.3s ease;
+        }
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring-circle {
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .celebration-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fpunjabdig9195back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="bg-gradient-to-br from-primary-50 to-accent-50 min-h-screen">
+    <!-- Language Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="languageToggle" class="language-toggle bg-white border border-border rounded-lg px-4 py-2 shadow-sm hover:shadow-md flex items-center gap-2 touch-target">
+            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=100&auto=format&fit=crop" alt="Language" class="w-5 h-5 rounded-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'; this.onerror=null;" />
+            <span id="languageText" class="text-sm font-medium text-text-primary">ਪੰਜਾਬੀ</span>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo and Title -->
+                <div class="flex items-center gap-4">
+                    <button id="backButton" class="p-2 rounded-lg hover:bg-surface transition-colors duration-200 touch-target">
+                        <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 id="headerTitle" class="text-fluid-lg font-semibold text-text-primary">Quiz Results</h1>
+                            <p id="headerSubtitle" class="text-xs text-text-secondary">Science - Chapter 1</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="student_dashboard.html" id="dashboardNav" class="text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200">Dashboard</a>
+                    <a href="subject_selection.html" id="subjectsNav" class="text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200">Subjects</a>
+                    <a href="lesson_player.html" id="lessonsNav" class="text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200">Lessons</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Score Overview Section -->
+        <section class="mb-8 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-8">
+                    <!-- Celebration Badge -->
+                    <div id="celebrationBadge" class="celebration-badge inline-flex items-center justify-center w-20 h-20 bg-success rounded-full mb-4">
+                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- Performance Level -->
+                    <h2 id="performanceLevel" class="text-fluid-2xl font-bold text-success mb-2">Excellent Work!</h2>
+                    <p id="encouragementMessage" class="text-text-secondary text-fluid-sm mb-6">You've shown great understanding of the concepts</p>
+                </div>
+
+                <!-- Score Display -->
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <!-- Circular Progress -->
+                    <div class="flex justify-center">
+                        <div class="relative w-48 h-48 bounce-in">
+                            <svg class="progress-ring w-full h-full" viewBox="0 0 84 84">
+                                <circle cx="42" cy="42" r="40" stroke="#E9ECEF" stroke-width="4" fill="none"/>
+                                <circle id="progressCircle" cx="42" cy="42" r="40" stroke="#28A745" stroke-width="4" fill="none" class="progress-ring-circle"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="scorePercentage" class="text-4xl font-bold text-success">85%</span>
+                                <span id="scoreLabel" class="text-sm text-text-secondary">Score</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Score Details -->
+                    <div class="space-y-6 slide-up">
+                        <div class="flex items-center justify-between p-4 bg-success-50 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-success rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p id="correctAnswersLabel" class="text-sm font-medium text-success-800">Correct Answers</p>
+                                    <p id="correctAnswersCount" class="text-xs text-success-600">17 out of 20</p>
+                                </div>
+                            </div>
+                            <span class="text-2xl font-bold text-success">17</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-error-50 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-error rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p id="incorrectAnswersLabel" class="text-sm font-medium text-error-800">Incorrect Answers</p>
+                                    <p id="incorrectAnswersCount" class="text-xs text-error-600">3 out of 20</p>
+                                </div>
+                            </div>
+                            <span class="text-2xl font-bold text-error">3</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-accent-50 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p id="timeSpentLabel" class="text-sm font-medium text-accent-800">Time Spent</p>
+                                    <p id="timeSpentValue" class="text-xs text-accent-600">12 minutes</p>
+                                </div>
+                            </div>
+                            <span class="text-2xl font-bold text-accent">12m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Analysis -->
+        <section class="mb-8 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 id="performanceAnalysisTitle" class="text-fluid-xl font-semibold text-text-primary mb-6">Performance Analysis</h3>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Progress Comparison -->
+                    <div class="space-y-4">
+                        <h4 id="progressComparisonTitle" class="text-fluid-lg font-medium text-text-primary">Progress Comparison</h4>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span id="currentAttemptLabel" class="text-sm text-text-secondary">Current Attempt</span>
+                                    <span class="text-sm font-medium text-success">85%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-success" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span id="previousAttemptLabel" class="text-sm text-text-secondary">Previous Attempt</span>
+                                    <span class="text-sm font-medium text-warning">72%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-warning" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span id="classAverageLabel" class="text-sm text-text-secondary">Class Average</span>
+                                    <span class="text-sm font-medium text-accent">78%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-accent" style="width: 78%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-success-50 rounded-lg p-4 mt-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L10 4.414 4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                <span id="improvementLabel" class="text-sm font-medium text-success-800">Great Improvement!</span>
+                            </div>
+                            <p id="improvementText" class="text-xs text-success-700">You've improved by 13% since your last attempt</p>
+                        </div>
+                    </div>
+
+                    <!-- Subject Strengths -->
+                    <div class="space-y-4">
+                        <h4 id="subjectStrengthsTitle" class="text-fluid-lg font-medium text-text-primary">Subject Strengths</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-success-50 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p id="conceptualUnderstandingLabel" class="text-sm font-medium text-success-800">Conceptual Understanding</p>
+                                        <p class="text-xs text-success-600">90%</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-success">Excellent</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-warning-50 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-warning rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p id="problemSolvingLabel" class="text-sm font-medium text-warning-800">Problem Solving</p>
+                                        <p class="text-xs text-warning-600">75%</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-warning">Good</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-accent-50 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p id="applicationSkillsLabel" class="text-sm font-medium text-accent-800">Application Skills</p>
+                                        <p class="text-xs text-accent-600">80%</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-accent">Very Good</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Question Review -->
+        <section class="mb-8 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 id="questionReviewTitle" class="text-fluid-xl font-semibold text-text-primary mb-6">Question Review</h3>
+                
+                <div class="space-y-4" id="questionReviewContainer">
+                    <!-- Question 1 - Correct -->
+                    <div class="result-card border border-success-200 bg-success-50 rounded-lg p-4">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-success-800">Question 1</span>
+                                    <span class="text-xs text-success-600">Correct</span>
+                                </div>
+                                <p class="text-sm text-text-primary mb-3">What is the process by which plants make their own food?</p>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-success-700 font-medium">Your Answer:</span>
+                                        <span class="text-xs text-success-800">Photosynthesis</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-success-700 font-medium">Correct Answer:</span>
+                                        <span class="text-xs text-success-800">Photosynthesis</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 p-3 bg-success-100 rounded-lg">
+                                    <p class="text-xs text-success-800"><strong>Explanation:</strong> Photosynthesis is the process where plants use sunlight, water, and carbon dioxide to produce glucose and oxygen.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 - Incorrect -->
+                    <div class="result-card border border-error-200 bg-error-50 rounded-lg p-4">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-error rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-error-800">Question 5</span>
+                                    <span class="text-xs text-error-600">Incorrect</span>
+                                </div>
+                                <p class="text-sm text-text-primary mb-3">Which gas is released during photosynthesis?</p>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-error-700 font-medium">Your Answer:</span>
+                                        <span class="text-xs text-error-800">Carbon Dioxide</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-success-700 font-medium">Correct Answer:</span>
+                                        <span class="text-xs text-success-800">Oxygen</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 p-3 bg-error-100 rounded-lg">
+                                    <p class="text-xs text-error-800"><strong>Explanation:</strong> During photosynthesis, plants release oxygen as a byproduct while absorbing carbon dioxide from the atmosphere.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Show More Button -->
+                    <div class="text-center pt-4">
+                        <button id="showMoreQuestions" class="text-accent hover:text-accent-600 text-sm font-medium transition-colors duration-200">
+                            <span id="showMoreText">Show More Questions</span>
+                            <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Recommendations -->
+        <section class="mb-8 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 id="recommendationsTitle" class="text-fluid-xl font-semibold text-text-primary mb-6">Learning Recommendations</h3>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Recommended Lessons -->
+                    <div class="space-y-4">
+                        <h4 id="recommendedLessonsTitle" class="text-fluid-lg font-medium text-text-primary">Recommended Lessons</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-4 p-4 bg-accent-50 rounded-lg hover:bg-accent-100 transition-colors duration-200 cursor-pointer">
+                                <img src="https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" alt="Plant Biology" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'; this.onerror=null;" />
+                                <div class="flex-1">
+                                    <h5 id="plantBiologyTitle" class="text-sm font-medium text-accent-800">Plant Biology Basics</h5>
+                                    <p id="plantBiologyDesc" class="text-xs text-accent-600">Review fundamental concepts</p>
+                                </div>
+                                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 p-4 bg-secondary-50 rounded-lg hover:bg-secondary-100 transition-colors duration-200 cursor-pointer">
+                                <img src="https://images.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_960_720.jpg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" alt="Advanced Photosynthesis" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'; this.onerror=null;" />
+                                <div class="flex-1">
+                                    <h5 id="advancedPhotosynthesisTitle" class="text-sm font-medium text-secondary-800">Advanced Photosynthesis</h5>
+                                    <p id="advancedPhotosynthesisDesc" class="text-xs text-secondary-600">Deepen your understanding</p>
+                                </div>
+                                <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Practice Suggestions -->
+                    <div class="space-y-4">
+                        <h4 id="practiceSuggestionsTitle" class="text-fluid-lg font-medium text-text-primary">Practice Suggestions</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="p-4 bg-warning-50 rounded-lg">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 bg-warning rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <h5 id="reviewMissedTopicsTitle" class="text-sm font-medium text-warning-800">Review Missed Topics</h5>
+                                </div>
+                                <p id="reviewMissedTopicsDesc" class="text-xs text-warning-700">Focus on gas exchange in plants and cellular respiration processes</p>
+                            </div>
+                            
+                            <div class="p-4 bg-success-50 rounded-lg">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <h5 id="practiceQuizzesTitle" class="text-sm font-medium text-success-800">Practice Quizzes</h5>
+                                </div>
+                                <p id="practiceQuizzesDesc" class="text-xs text-success-700">Take more quizzes on plant biology to reinforce your knowledge</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievement Badges -->
+        <section class="mb-8 fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 id="achievementsTitle" class="text-fluid-xl font-semibold text-text-primary mb-6">Achievements Unlocked</h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-success-50 rounded-lg">
+                        <div class="w-16 h-16 bg-success rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                        <h4 id="highScoreTitle" class="text-sm font-medium text-success-800">High Score</h4>
+                        <p id="highScoreDesc" class="text-xs text-success-600">85%+ Achievement</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-accent-50 rounded-lg">
+                        <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h4 id="improvementTitle" class="text-sm font-medium text-accent-800">Improvement</h4>
+                        <p id="improvementDesc" class="text-xs text-accent-600">13% Better</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-secondary-50 rounded-lg">
+                        <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h4 id="consistentTitle" class="text-sm font-medium text-secondary-800">Consistent</h4>
+                        <p id="consistentDesc" class="text-xs text-secondary-600">3rd Quiz Completed</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-primary-50 rounded-lg">
+                        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                            </svg>
+                        </div>
+                        <h4 id="scholarTitle" class="text-sm font-medium text-primary-800">Scholar</h4>
+                        <p id="scholarDesc" class="text-xs text-primary-600">Science Expert</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <button id="retakeQuizBtn" class="w-full bg-accent text-white py-3 px-4 rounded-lg font-medium hover:bg-accent-600 transition-all duration-200 touch-target flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span id="retakeQuizText">Retake Quiz</span>
+                    </button>
+                    
+                    <button id="reviewLessonsBtn" class="w-full bg-secondary text-white py-3 px-4 rounded-lg font-medium hover:bg-secondary-600 transition-all duration-200 touch-target flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        <span id="reviewLessonsText">Review Lessons</span>
+                    </button>
+                    
+                    <button id="nextTopicBtn" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 transition-all duration-200 touch-target flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                        <span id="nextTopicText">Next Topic</span>
+                    </button>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <button id="backToDashboardBtn" class="text-text-secondary hover:text-primary text-sm font-medium transition-colors duration-200">
+                        <span id="backToDashboardText">← Back to Dashboard</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Success Message -->
+    <div id="messageContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div id="messageBox" class="bg-white border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80">
+            <div id="messageIcon" class="flex-shrink-0"></div>
+            <div>
+                <p id="messageText" class="text-sm font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                languageText: "ਪੰਜਾਬੀ",
+                headerTitle: "Quiz Results",
+                headerSubtitle: "Science - Chapter 1",
+                dashboardNav: "Dashboard",
+                subjectsNav: "Subjects",
+                lessonsNav: "Lessons",
+                performanceLevel: "Excellent Work!",
+                encouragementMessage: "You've shown great understanding of the concepts",
+                scoreLabel: "Score",
+                correctAnswersLabel: "Correct Answers",
+                correctAnswersCount: "17 out of 20",
+                incorrectAnswersLabel: "Incorrect Answers",
+                incorrectAnswersCount: "3 out of 20",
+                timeSpentLabel: "Time Spent",
+                timeSpentValue: "12 minutes",
+                performanceAnalysisTitle: "Performance Analysis",
+                progressComparisonTitle: "Progress Comparison",
+                currentAttemptLabel: "Current Attempt",
+                previousAttemptLabel: "Previous Attempt",
+                classAverageLabel: "Class Average",
+                improvementLabel: "Great Improvement!",
+                improvementText: "You've improved by 13% since your last attempt",
+                subjectStrengthsTitle: "Subject Strengths",
+                conceptualUnderstandingLabel: "Conceptual Understanding",
+                problemSolvingLabel: "Problem Solving",
+                applicationSkillsLabel: "Application Skills",
+                questionReviewTitle: "Question Review",
+                showMoreText: "Show More Questions",
+                recommendationsTitle: "Learning Recommendations",
+                recommendedLessonsTitle: "Recommended Lessons",
+                plantBiologyTitle: "Plant Biology Basics",
+                plantBiologyDesc: "Review fundamental concepts",
+                advancedPhotosynthesisTitle: "Advanced Photosynthesis",
+                advancedPhotosynthesisDesc: "Deepen your understanding",
+                practiceSuggestionsTitle: "Practice Suggestions",
+                reviewMissedTopicsTitle: "Review Missed Topics",
+                reviewMissedTopicsDesc: "Focus on gas exchange in plants and cellular respiration processes",
+                practiceQuizzesTitle: "Practice Quizzes",
+                practiceQuizzesDesc: "Take more quizzes on plant biology to reinforce your knowledge",
+                achievementsTitle: "Achievements Unlocked",
+                highScoreTitle: "High Score",
+                highScoreDesc: "85%+ Achievement",
+                improvementTitle: "Improvement",
+                improvementDesc: "13% Better",
+                consistentTitle: "Consistent",
+                consistentDesc: "3rd Quiz Completed",
+                scholarTitle: "Scholar",
+                scholarDesc: "Science Expert",
+                retakeQuizText: "Retake Quiz",
+                reviewLessonsText: "Review Lessons",
+                nextTopicText: "Next Topic",
+                backToDashboardText: "← Back to Dashboard"
+            },
+            pa: {
+                languageText: "English",
+                headerTitle: "ਕੁਇਜ਼ ਨਤੀਜੇ",
+                headerSubtitle: "ਵਿਗਿਆਨ - ਅਧਿਆਇ 1",
+                dashboardNav: "ਡੈਸ਼ਬੋਰਡ",
+                subjectsNav: "ਵਿਸ਼ੇ",
+                lessonsNav: "ਪਾਠ",
+                performanceLevel: "ਸ਼ਾਨਦਾਰ ਕੰਮ!",
+                encouragementMessage: "ਤੁਸੀਂ ਸੰਕਲਪਾਂ ਦੀ ਵਧੀਆ ਸਮਝ ਦਿਖਾਈ ਹੈ",
+                scoreLabel: "ਸਕੋਰ",
+                correctAnswersLabel: "ਸਹੀ ਜਵਾਬ",
+                correctAnswersCount: "20 ਵਿੱਚੋਂ 17",
+                incorrectAnswersLabel: "ਗਲਤ ਜਵਾਬ",
+                incorrectAnswersCount: "20 ਵਿੱਚੋਂ 3",
+                timeSpentLabel: "ਸਮਾਂ ਲਗਾਇਆ",
+                timeSpentValue: "12 ਮਿੰਟ",
+                performanceAnalysisTitle: "ਪ੍ਰਦਰਸ਼ਨ ਵਿਸ਼ਲੇਸ਼ਣ",
+                progressComparisonTitle: "ਪ੍ਰਗਤੀ ਤੁਲਨਾ",
+                currentAttemptLabel: "ਮੌਜੂਦਾ ਕੋਸ਼ਿਸ਼",
+                previousAttemptLabel: "ਪਿਛਲੀ ਕੋਸ਼ਿਸ਼",
+                classAverageLabel: "ਕਲਾਸ ਔਸਤ",
+                improvementLabel: "ਸ਼ਾਨਦਾਰ ਸੁਧਾਰ!",
+                improvementText: "ਤੁਸੀਂ ਆਪਣੀ ਪਿਛਲੀ ਕੋਸ਼ਿਸ਼ ਤੋਂ 13% ਸੁਧਾਰ ਕੀਤਾ ਹੈ",
+                subjectStrengthsTitle: "ਵਿਸ਼ੇ ਦੀਆਂ ਤਾਕਤਾਂ",
+                conceptualUnderstandingLabel: "ਸੰਕਲਪਿਕ ਸਮਝ",
+                problemSolvingLabel: "ਸਮੱਸਿਆ ਹੱਲ",
+                applicationSkillsLabel: "ਲਾਗੂ ਕਰਨ ਦੇ ਹੁਨਰ",
+                questionReviewTitle: "ਸਵਾਲ ਸਮੀਖਿਆ",
+                showMoreText: "ਹੋਰ ਸਵਾਲ ਦਿਖਾਓ",
+                recommendationsTitle: "ਸਿੱਖਣ ਦੀਆਂ ਸਿਫਾਰਸ਼ਾਂ",
+                recommendedLessonsTitle: "ਸਿਫਾਰਸ਼ੀ ਪਾਠ",
+                plantBiologyTitle: "ਪੌਧਿਆਂ ਦੇ ਜੀਵ ਵਿਗਿਆਨ ਦੀਆਂ ਬੁਨਿਆਦਾਂ",
+                plantBiologyDesc: "ਬੁਨਿਆਦੀ ਸੰਕਲਪਾਂ ਦੀ ਸਮੀਖਿਆ",
+                advancedPhotosynthesisTitle: "ਉੱਨਤ ਪ੍ਰਕਾਸ਼ ਸੰਸ਼ਲੇਸ਼ਣ",
+                advancedPhotosynthesisDesc: "ਆਪਣੀ ਸਮਝ ਨੂੰ ਡੂੰਘਾ ਕਰੋ",
+                practiceSuggestionsTitle: "ਅਭਿਆਸ ਸੁਝਾਅ",
+                reviewMissedTopicsTitle: "ਛੁੱਟੇ ਵਿਸ਼ਿਆਂ ਦੀ ਸਮੀਖਿਆ",
+                reviewMissedTopicsDesc: "ਪੌਧਿਆਂ ਵਿੱਚ ਗੈਸ ਦੇ ਆਦਾਨ-ਪ੍ਰਦਾਨ ਅਤੇ ਸੈਲੂਲਰ ਸਾਹ ਪ੍ਰਕਿਰਿਆਵਾਂ 'ਤੇ ਧਿਆਨ ਦਿਓ",
+                practiceQuizzesTitle: "ਅਭਿਆਸ ਕੁਇਜ਼",
+                practiceQuizzesDesc: "ਆਪਣੇ ਗਿਆਨ ਨੂੰ ਮਜ਼ਬੂਤ ਕਰਨ ਲਈ ਪੌਧਿਆਂ ਦੇ ਜੀਵ ਵਿਗਿਆਨ 'ਤੇ ਹੋਰ ਕੁਇਜ਼ ਲਓ",
+                achievementsTitle: "ਪ੍ਰਾਪਤੀਆਂ ਅਨਲਾਕ ਕੀਤੀਆਂ",
+                highScoreTitle: "ਉੱਚ ਸਕੋਰ",
+                highScoreDesc: "85%+ ਪ੍ਰਾਪਤੀ",
+                improvementTitle: "ਸੁਧਾਰ",
+                improvementDesc: "13% ਬਿਹਤਰ",
+                consistentTitle: "ਨਿਰੰਤਰ",
+                consistentDesc: "ਤੀਜਾ ਕੁਇਜ਼ ਪੂਰਾ",
+                scholarTitle: "ਵਿਦਵਾਨ",
+                scholarDesc: "ਵਿਗਿਆਨ ਮਾਹਰ",
+                retakeQuizText: "ਕੁਇਜ਼ ਦੁਬਾਰਾ ਲਓ",
+                reviewLessonsText: "ਪਾਠਾਂ ਦੀ ਸਮੀਖਿਆ",
+                nextTopicText: "ਅਗਲਾ ਵਿਸ਼ਾ",
+                backToDashboardText: "← ਡੈਸ਼ਬੋਰਡ 'ਤੇ ਵਾਪਸ"
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        // Language toggle functionality
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'pa' : 'en';
+            updateLanguage();
+        });
+
+        function updateLanguage() {
+            const elements = translations[currentLanguage];
+            
+            // Update all text elements
+            Object.keys(elements).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = elements[key];
+                    if (currentLanguage === 'pa') {
+                        element.classList.add('punjabi-text');
+                    } else {
+                        element.classList.remove('punjabi-text');
+                    }
+                }
+            });
+        }
+
+        // Initialize progress circle animation
+        function animateProgressCircle() {
+            const circle = document.getElementById('progressCircle');
+            const percentage = 85;
+            const circumference = 2 * Math.PI * 40;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            setTimeout(() => {
+                circle.style.strokeDashoffset = offset;
+            }, 500);
+        }
+
+        // Show more questions functionality
+        document.getElementById('showMoreQuestions').addEventListener('click', function() {
+            const button = this;
+            const container = document.getElementById('questionReviewContainer');
+            
+            if (button.textContent.includes('Show More')) {
+                // Add more questions
+                const additionalQuestions = `
+                    <!-- Question 3 - Correct -->
+                    <div class="result-card border border-success-200 bg-success-50 rounded-lg p-4 slide-up">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-success-800">Question 8</span>
+                                    <span class="text-xs text-success-600">Correct</span>
+                                </div>
+                                <p class="text-sm text-text-primary mb-3">What is the main function of chlorophyll in plants?</p>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-success-700 font-medium">Your Answer:</span>
+                                        <span class="text-xs text-success-800">To absorb light energy</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-success-700 font-medium">Correct Answer:</span>
+                                        <span class="text-xs text-success-800">To absorb light energy</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 p-3 bg-success-100 rounded-lg">
+                                    <p class="text-xs text-success-800"><strong>Explanation:</strong> Chlorophyll is the green pigment that captures light energy for photosynthesis.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', additionalQuestions);
+                button.innerHTML = `
+                    <span>Show Less Questions</span>
+                    <svg class="w-4 h-4 inline-block ml-1 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                `;
+            } else {
+                // Remove additional questions
+                const additionalQuestions = container.querySelectorAll('.slide-up');
+                additionalQuestions.forEach(q => q.remove());
+                button.innerHTML = `
+                    <span>Show More Questions</span>
+                    <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                `;
+            }
+        });
+
+        // Navigation handlers
+        document.getElementById('backButton').addEventListener('click', function() {
+            window.history.back();
+        });
+
+        document.getElementById('retakeQuizBtn').addEventListener('click', function() {
+            showMessage('Redirecting to quiz...', 'success');
+            setTimeout(() => {
+                window.location.href = 'quiz_interface.html';
+            }, 1000);
+        });
+
+        document.getElementById('reviewLessonsBtn').addEventListener('click', function() {
+            showMessage('Opening lesson player...', 'success');
+            setTimeout(() => {
+                window.location.href = 'lesson_player.html';
+            }, 1000);
+        });
+
+        document.getElementById('nextTopicBtn').addEventListener('click', function() {
+            showMessage('Loading next topic...', 'success');
+            setTimeout(() => {
+                window.location.href = 'subject_selection.html';
+            }, 1000);
+        });
+
+        document.getElementById('backToDashboardBtn').addEventListener('click', function() {
+            window.location.href = 'student_dashboard.html';
+        });
+
+        function showMessage(text, type) {
+            const container = document.getElementById('messageContainer');
+            const messageBox = document.getElementById('messageBox');
+            const messageIcon = document.getElementById('messageIcon');
+            const messageText = document.getElementById('messageText');
+
+            messageText.textContent = text;
+
+            if (type === 'success') {
+                messageBox.className = 'bg-success-50 border border-success-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-success-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-success-800';
+            }
+
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Update performance level based on score
+        function updatePerformanceLevel() {
+            const score = 85;
+            const levelElement = document.getElementById('performanceLevel');
+            const messageElement = document.getElementById('encouragementMessage');
+            const badgeElement = document.getElementById('celebrationBadge');
+            
+            if (score >= 90) {
+                levelElement.textContent = currentLanguage === 'en' ? 'Outstanding!' : 'ਸ਼ਾਨਦਾਰ!';
+                messageElement.textContent = currentLanguage === 'en' ? 'You have mastered this topic completely' : 'ਤੁਸੀਂ ਇਸ ਵਿਸ਼ੇ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਮਾਸਟਰ ਕਰ ਲਿਆ ਹੈ';
+                badgeElement.className = 'celebration-badge inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-4';
+            } else if (score >= 80) {
+                levelElement.textContent = currentLanguage === 'en' ? 'Excellent Work!' : 'ਸ਼ਾਨਦਾਰ ਕੰਮ!';
+                messageElement.textContent = currentLanguage === 'en' ? "You've shown great understanding of the concepts" : 'ਤੁਸੀਂ ਸੰਕਲਪਾਂ ਦੀ ਵਧੀਆ ਸਮਝ ਦਿਖਾਈ ਹੈ';
+                badgeElement.className = 'celebration-badge inline-flex items-center justify-center w-20 h-20 bg-success rounded-full mb-4';
+            } else if (score >= 70) {
+                levelElement.textContent = currentLanguage === 'en' ? 'Good Job!' : 'ਵਧੀਆ ਕੰਮ!';
+                messageElement.textContent = currentLanguage === 'en' ? 'You have a solid understanding, keep practicing' : 'ਤੁਹਾਡੀ ਠੋਸ ਸਮਝ ਹੈ, ਅਭਿਆਸ ਜਾਰੀ ਰੱਖੋ';
+                badgeElement.className = 'celebration-badge inline-flex items-center justify-center w-20 h-20 bg-accent rounded-full mb-4';
+            } else {
+                levelElement.textContent = currentLanguage === 'en' ? 'Keep Trying!' : 'ਕੋਸ਼ਿਸ਼ ਜਾਰੀ ਰੱਖੋ!';
+                messageElement.textContent = currentLanguage === 'en' ? 'Review the lessons and try again' : 'ਪਾਠਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ';
+                badgeElement.className = 'celebration-badge inline-flex items-center justify-center w-20 h-20 bg-warning rounded-full mb-4';
+            }
+        }
+
+        // Store quiz results in localStorage
+        function storeQuizResults() {
+            const results = {
+                score: 85,
+                correctAnswers: 17,
+                totalQuestions: 20,
+                timeSpent: 12,
+                subject: 'Science',
+                chapter: 'Chapter 1',
+                date: new Date().toISOString(),
+                improvements: 13
+            };
+            
+            let quizHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+            quizHistory.push(results);
+            localStorage.setItem('quizHistory', JSON.stringify(quizHistory));
+            
+            // Update overall progress
+            let overallProgress = JSON.parse(localStorage.getItem('overallProgress') || '{}');
+            overallProgress.science = overallProgress.science || {};
+            overallProgress.science.chapter1 = {
+                completed: true,
+                score: 85,
+                lastAttempt: new Date().toISOString()
+            };
+            localStorage.setItem('overallProgress', JSON.stringify(overallProgress));
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            if (localStorage.getItem('userLoggedIn') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize animations and data
+            animateProgressCircle();
+            updatePerformanceLevel();
+            storeQuizResults();
+            
+            // Add fade-in animation to sections
+            const sections = document.querySelectorAll('section');
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

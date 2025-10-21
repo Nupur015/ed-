@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punjab Digital Learning - Login</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .punjabi-text {
+            font-family: 'Noto Sans Gurmukhi', sans-serif;
+        }
+        .language-toggle {
+            transition: all 0.3s ease;
+        }
+        .auth-option {
+            transition: all 0.2s ease;
+        }
+        .auth-option:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1B4332;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fpunjabdig9195back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="bg-gradient-to-br from-primary-50 to-accent-50 min-h-screen">
+    <!-- Language Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="languageToggle" class="language-toggle bg-white border border-border rounded-lg px-4 py-2 shadow-sm hover:shadow-md flex items-center gap-2 touch-target">
+            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=100&auto=format&fit=crop" alt="Language" class="w-5 h-5 rounded-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'; this.onerror=null;" />
+            <span id="languageText" class="text-sm font-medium text-text-primary">ਪੰਜਾਬੀ</span>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="min-h-screen flex items-center justify-center px-4 py-8">
+        <div class="w-full max-w-md">
+            <!-- Logo Section -->
+            <div class="text-center mb-8 fade-in">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-4 shadow-lg">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <h1 id="appTitle" class="text-fluid-2xl font-bold text-primary mb-2">Punjab Digital Learning</h1>
+                <p id="appSubtitle" class="text-text-secondary text-fluid-sm">ਪੰਜਾਬ ਡਿਜੀਟਲ ਸਿੱਖਿਆ</p>
+            </div>
+
+            <!-- Login Form Container -->
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 fade-in">
+                <div class="text-center mb-6">
+                    <h2 id="loginTitle" class="text-fluid-xl font-semibold text-text-primary mb-2">Welcome Back</h2>
+                    <p id="loginSubtitle" class="text-text-secondary text-fluid-sm">Choose your login method</p>
+                </div>
+
+                <!-- Google OAuth Login -->
+                <div class="mb-4">
+                    <button id="googleLogin" class="auth-option w-full bg-white border-2 border-border rounded-lg px-4 py-3 flex items-center justify-center gap-3 hover:bg-gray-50 touch-target">
+                        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="w-5 h-5" />
+                        <span id="googleLoginText" class="font-medium text-text-primary">Continue with Google</span>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-border"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span id="orText" class="px-2 bg-white text-text-secondary">or</span>
+                    </div>
+                </div>
+
+                <!-- Authentication Tabs -->
+                <div class="mb-6">
+                    <div class="flex bg-surface rounded-lg p-1">
+                        <button id="emailTab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 bg-white text-primary shadow-sm">
+                            <span id="emailTabText">Email Login</span>
+                        </button>
+                        <button id="studentIdTab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 text-text-secondary hover:text-primary">
+                            <span id="studentIdTabText">Student ID</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Email Login Form -->
+                <form id="emailLoginForm" class="space-y-4">
+                    <div>
+                        <label id="emailLabel" for="email" class="block text-sm font-medium text-text-primary mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" required class="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 touch-target" placeholder="student@punjab.edu" />
+                    </div>
+                    <div>
+                        <label id="passwordLabel" for="password" class="block text-sm font-medium text-text-primary mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" required class="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 touch-target pr-12" placeholder="••••••••" />
+                            <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-primary touch-target">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" id="emailLoginBtn" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 transition-all duration-200 touch-target flex items-center justify-center gap-2">
+                        <span id="emailLoginBtnText">Sign In</span>
+                        <div id="emailLoginSpinner" class="loading-spinner hidden"></div>
+                    </button>
+                </form>
+
+                <!-- Student ID Login Form -->
+                <form id="studentIdLoginForm" class="space-y-4 hidden">
+                    <div>
+                        <label id="studentIdLabel" for="studentId" class="block text-sm font-medium text-text-primary mb-2">Student ID</label>
+                        <input type="text" id="studentId" name="studentId" required class="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 touch-target" placeholder="PB2024001" />
+                    </div>
+                    <div>
+                        <label id="studentPasswordLabel" for="studentPassword" class="block text-sm font-medium text-text-primary mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="studentPassword" name="studentPassword" required class="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 touch-target pr-12" placeholder="••••••••" />
+                            <button type="button" id="toggleStudentPassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-primary touch-target">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" id="studentIdLoginBtn" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 transition-all duration-200 touch-target flex items-center justify-center gap-2">
+                        <span id="studentIdLoginBtnText">Sign In</span>
+                        <div id="studentIdLoginSpinner" class="loading-spinner hidden"></div>
+                    </button>
+                </form>
+
+                <!-- Additional Links -->
+                <div class="mt-6 text-center space-y-3">
+                    <a href="javascript:void(0)" id="forgotPasswordLink" class="text-sm text-accent hover:text-accent-600 transition-colors duration-200">Forgot Password?</a>
+                    <div class="text-sm text-text-secondary">
+                        <span id="noAccountText">Don't have an account?</span>
+                        <a href="javascript:void(0)" id="registerLink" class="text-accent hover:text-accent-600 font-medium ml-1 transition-colors duration-200">Register Here</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-8">
+                <p class="text-xs text-text-secondary">
+                    © 2025 Government of Punjab. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div id="messageBox" class="bg-white border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80">
+            <div id="messageIcon" class="flex-shrink-0"></div>
+            <div>
+                <p id="messageText" class="text-sm font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                appTitle: "Punjab Digital Learning",
+                appSubtitle: "ਪੰਜਾਬ ਡਿਜੀਟਲ ਸਿੱਖਿਆ",
+                loginTitle: "Welcome Back",
+                loginSubtitle: "Choose your login method",
+                googleLoginText: "Continue with Google",
+                orText: "or",
+                emailTabText: "Email Login",
+                studentIdTabText: "Student ID",
+                emailLabel: "Email Address",
+                passwordLabel: "Password",
+                emailLoginBtnText: "Sign In",
+                studentIdLabel: "Student ID",
+                studentPasswordLabel: "Password",
+                studentIdLoginBtnText: "Sign In",
+                forgotPasswordLink: "Forgot Password?",
+                noAccountText: "Don't have an account?",
+                registerLink: "Register Here",
+                languageText: "ਪੰਜਾਬੀ"
+            },
+            pa: {
+                appTitle: "ਪੰਜਾਬ ਡਿਜੀਟਲ ਸਿੱਖਿਆ",
+                appSubtitle: "Punjab Digital Learning",
+                loginTitle: "ਜੀ ਆਇਆਂ ਨੂੰ",
+                loginSubtitle: "ਆਪਣਾ ਲਾਗਇਨ ਤਰੀਕਾ ਚੁਣੋ",
+                googleLoginText: "Google ਨਾਲ ਜਾਰੀ ਰੱਖੋ",
+                orText: "ਜਾਂ",
+                emailTabText: "ਈਮੇਲ ਲਾਗਇਨ",
+                studentIdTabText: "ਵਿਦਿਆਰਥੀ ID",
+                emailLabel: "ਈਮੇਲ ਪਤਾ",
+                passwordLabel: "ਪਾਸਵਰਡ",
+                emailLoginBtnText: "ਸਾਇਨ ਇਨ",
+                studentIdLabel: "ਵਿਦਿਆਰਥੀ ID",
+                studentPasswordLabel: "ਪਾਸਵਰਡ",
+                studentIdLoginBtnText: "ਸਾਇਨ ਇਨ",
+                forgotPasswordLink: "ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?",
+                noAccountText: "ਖਾਤਾ ਨਹੀਂ ਹੈ?",
+                registerLink: "ਇੱਥੇ ਰਜਿਸਟਰ ਕਰੋ",
+                languageText: "English"
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        // Language toggle functionality
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'pa' : 'en';
+            updateLanguage();
+        });
+
+        function updateLanguage() {
+            const elements = translations[currentLanguage];
+            
+            // Update all text elements
+            Object.keys(elements).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = elements[key];
+                    if (currentLanguage === 'pa') {
+                        element.classList.add('punjabi-text');
+                    } else {
+                        element.classList.remove('punjabi-text');
+                    }
+                }
+            });
+
+            // Update placeholders
+            if (currentLanguage === 'pa') {
+                document.getElementById('email').placeholder = 'student@punjab.edu';
+                document.getElementById('studentId').placeholder = 'PB2024001';
+            } else {
+                document.getElementById('email').placeholder = 'student@punjab.edu';
+                document.getElementById('studentId').placeholder = 'PB2024001';
+            }
+        }
+
+        // Tab switching functionality
+        document.getElementById('emailTab').addEventListener('click', function() {
+            switchTab('email');
+        });
+
+        document.getElementById('studentIdTab').addEventListener('click', function() {
+            switchTab('studentId');
+        });
+
+        function switchTab(tabType) {
+            const emailTab = document.getElementById('emailTab');
+            const studentIdTab = document.getElementById('studentIdTab');
+            const emailForm = document.getElementById('emailLoginForm');
+            const studentIdForm = document.getElementById('studentIdLoginForm');
+
+            if (tabType === 'email') {
+                emailTab.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                emailTab.classList.remove('text-text-secondary');
+                studentIdTab.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                studentIdTab.classList.add('text-text-secondary');
+                emailForm.classList.remove('hidden');
+                studentIdForm.classList.add('hidden');
+            } else {
+                studentIdTab.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                studentIdTab.classList.remove('text-text-secondary');
+                emailTab.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                emailTab.classList.add('text-text-secondary');
+                studentIdForm.classList.remove('hidden');
+                emailForm.classList.add('hidden');
+            }
+        }
+
+        // Password toggle functionality
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            togglePasswordVisibility('password');
+        });
+
+        document.getElementById('toggleStudentPassword').addEventListener('click', function() {
+            togglePasswordVisibility('studentPassword');
+        });
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+
+        // Form submission handlers
+        document.getElementById('emailLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleLogin('email');
+        });
+
+        document.getElementById('studentIdLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleLogin('studentId');
+        });
+
+        document.getElementById('googleLogin').addEventListener('click', function() {
+            handleLogin('google');
+        });
+
+        function handleLogin(type) {
+            let spinner, button;
+            
+            if (type === 'email') {
+                spinner = document.getElementById('emailLoginSpinner');
+                button = document.getElementById('emailLoginBtn');
+            } else if (type === 'studentId') {
+                spinner = document.getElementById('studentIdLoginSpinner');
+                button = document.getElementById('studentIdLoginBtn');
+            }
+
+            // Show loading state
+            if (spinner && button) {
+                spinner.classList.remove('hidden');
+                button.disabled = true;
+            }
+
+            // Simulate authentication process
+            setTimeout(() => {
+                // Mock authentication logic
+                let isValid = false;
+                
+                if (type === 'google') {
+                    isValid = true;
+                } else if (type === 'email') {
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    isValid = email === 'student@punjab.edu' && password === 'student123';
+                } else if (type === 'studentId') {
+                    const studentId = document.getElementById('studentId').value;
+                    const password = document.getElementById('studentPassword').value;
+                    isValid = studentId === 'PB2024001' && password === 'pass123';
+                }
+
+                // Hide loading state
+                if (spinner && button) {
+                    spinner.classList.add('hidden');
+                    button.disabled = false;
+                }
+
+                if (isValid) {
+                    showMessage('Login successful! Redirecting...', 'success');
+                    // Store user session
+                    localStorage.setItem('userLoggedIn', 'true');
+                    localStorage.setItem('loginType', type);
+                    
+                    setTimeout(() => {
+                        window.location.href = 'student_dashboard.html';
+                    }, 1500);
+                } else {
+                    showMessage('Invalid credentials. Please try again.', 'error');
+                }
+            }, 1500);
+        }
+
+        function showMessage(text, type) {
+            const container = document.getElementById('messageContainer');
+            const messageBox = document.getElementById('messageBox');
+            const messageIcon = document.getElementById('messageIcon');
+            const messageText = document.getElementById('messageText');
+
+            messageText.textContent = text;
+
+            if (type === 'success') {
+                messageBox.className = 'bg-success-50 border border-success-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-success-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-success-800';
+            } else {
+                messageBox.className = 'bg-error-50 border border-error-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-error-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-error-800';
+            }
+
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            if (localStorage.getItem('userLoggedIn') === 'true') {
+                window.location.href = 'student_dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

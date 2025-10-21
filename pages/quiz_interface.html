@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punjab Digital Learning - Quiz Interface</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .punjabi-text {
+            font-family: 'Noto Sans Gurmukhi', sans-serif;
+        }
+        .language-toggle {
+            transition: all 0.3s ease;
+        }
+        .quiz-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .quiz-option:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .quiz-option.selected {
+            background-color: #EBF5FA;
+            border-color: #2E86AB;
+            box-shadow: 0 0 0 2px rgba(46, 134, 171, 0.2);
+        }
+        .quiz-option input[type="radio"] {
+            transform: scale(1.2);
+        }
+        .progress-animation {
+            transition: width 0.8s ease-in-out;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .timer-warning {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .question-image {
+            max-height: 200px;
+            object-fit: contain;
+        }
+        .confirmation-modal {
+            backdrop-filter: blur(4px);
+        }
+    </style>
+<script type="module" src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fpunjabdig9195back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.8"></script>
+</head>
+<body class="bg-gradient-to-br from-primary-50 to-accent-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-border sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo and Title -->
+                <div class="flex items-center gap-3">
+                    <button onclick="window.history.back()" class="p-2 hover:bg-surface rounded-lg transition-colors duration-200 touch-target">
+                        <svg class="w-5 h-5 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 id="headerTitle" class="text-lg font-semibold text-text-primary">Quiz Assessment</h1>
+                            <p id="headerSubtitle" class="text-xs text-text-secondary">Science - Grade 6</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Language Toggle -->
+                <button id="languageToggle" class="language-toggle bg-surface border border-border rounded-lg px-3 py-2 shadow-sm hover:shadow-md flex items-center gap-2 touch-target">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=100&auto=format&fit=crop" alt="Language" class="w-4 h-4 rounded-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'; this.onerror=null;" />
+                    <span id="languageText" class="text-sm font-medium text-text-primary">ਪੰਜਾਬੀ</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Quiz Progress Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-border p-6 mb-6 fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 id="progressTitle" class="text-fluid-lg font-semibold text-text-primary mb-1">Quiz Progress</h2>
+                    <p id="questionCounter" class="text-text-secondary text-fluid-sm">Question 1 of 10</p>
+                </div>
+                <div id="timerSection" class="text-right">
+                    <p id="timerLabel" class="text-text-secondary text-fluid-sm mb-1">Time Remaining</p>
+                    <div id="timerDisplay" class="text-fluid-lg font-semibold text-accent">15:00</div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill progress-animation" style="width: 10%"></div>
+            </div>
+            <div class="flex justify-between text-xs text-text-secondary mt-2">
+                <span id="progressStart">Start</span>
+                <span id="progressEnd">Complete</span>
+            </div>
+        </div>
+
+        <!-- Question Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-border p-6 mb-6 fade-in">
+            <!-- Question Header -->
+            <div class="mb-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">Q1</span>
+                    <span id="questionType" class="text-text-secondary text-sm">Multiple Choice</span>
+                </div>
+                <h3 id="questionText" class="text-fluid-xl font-semibold text-text-primary leading-relaxed mb-4">
+                    What is the process by which plants make their own food using sunlight?
+                </h3>
+                
+                <!-- Question Image (if applicable) -->
+                <div id="questionImageContainer" class="mb-4 hidden">
+                    <img id="questionImage" src alt="Question illustration" class="question-image w-full rounded-lg border border-border" loading="lazy" />
+                </div>
+                
+                <!-- Question Context -->
+                <div id="questionContext" class="bg-accent-50 border-l-4 border-accent p-4 rounded-r-lg mb-4 hidden">
+                    <p class="text-text-primary text-fluid-sm"></p>
+                </div>
+            </div>
+
+            <!-- Answer Options -->
+            <div id="answerOptions" class="space-y-3">
+                <!-- Option A -->
+                <label class="quiz-option block bg-surface border-2 border-border rounded-lg p-4 hover:bg-accent-50 touch-target">
+                    <div class="flex items-center gap-4">
+                        <input type="radio" name="answer" value="A" class="text-accent focus:ring-accent focus:ring-2" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">A</span>
+                                <span id="optionA" class="text-text-primary font-medium">Photosynthesis</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Option B -->
+                <label class="quiz-option block bg-surface border-2 border-border rounded-lg p-4 hover:bg-accent-50 touch-target">
+                    <div class="flex items-center gap-4">
+                        <input type="radio" name="answer" value="B" class="text-accent focus:ring-accent focus:ring-2" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">B</span>
+                                <span id="optionB" class="text-text-primary font-medium">Respiration</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Option C -->
+                <label class="quiz-option block bg-surface border-2 border-border rounded-lg p-4 hover:bg-accent-50 touch-target">
+                    <div class="flex items-center gap-4">
+                        <input type="radio" name="answer" value="C" class="text-accent focus:ring-accent focus:ring-2" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">C</span>
+                                <span id="optionC" class="text-text-primary font-medium">Digestion</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Option D -->
+                <label class="quiz-option block bg-surface border-2 border-border rounded-lg p-4 hover:bg-accent-50 touch-target">
+                    <div class="flex items-center gap-4">
+                        <input type="radio" name="answer" value="D" class="text-accent focus:ring-accent focus:ring-2" />
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">D</span>
+                                <span id="optionD" class="text-text-primary font-medium">Circulation</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Answer Feedback (Hidden initially) -->
+            <div id="answerFeedback" class="mt-6 p-4 rounded-lg border hidden">
+                <div class="flex items-start gap-3">
+                    <div id="feedbackIcon" class="flex-shrink-0 mt-1"></div>
+                    <div>
+                        <p id="feedbackText" class="font-medium mb-2"></p>
+                        <p id="feedbackExplanation" class="text-sm text-text-secondary"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="bg-white rounded-xl shadow-sm border border-border p-6 fade-in">
+            <div class="flex items-center justify-between">
+                <button id="previousBtn" class="flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-primary transition-colors duration-200 touch-target disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    <span id="previousBtnText">Previous</span>
+                </button>
+
+                <div class="flex items-center gap-3">
+                    <button id="reviewBtn" class="px-4 py-2 border border-border text-text-primary hover:bg-surface rounded-lg transition-colors duration-200 touch-target hidden">
+                        <span id="reviewBtnText">Review Answers</span>
+                    </button>
+                    <button id="nextBtn" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200 touch-target disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <span id="nextBtnText">Next Question</span>
+                    </button>
+                    <button id="submitBtn" class="bg-success text-white px-6 py-2 rounded-lg font-medium hover:bg-success-600 transition-colors duration-200 touch-target hidden">
+                        <span id="submitBtnText">Submit Quiz</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 confirmation-modal flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <h3 id="modalTitle" class="text-fluid-lg font-semibold text-text-primary mb-2">Submit Quiz?</h3>
+                <p id="modalMessage" class="text-text-secondary text-fluid-sm mb-6">Are you sure you want to submit your quiz? You won't be able to change your answers after submission.</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="modalCancel" class="px-4 py-2 border border-border text-text-primary hover:bg-surface rounded-lg transition-colors duration-200 touch-target">Cancel</button>
+                    <button id="modalConfirm" class="px-4 py-2 bg-success text-white hover:bg-success-600 rounded-lg transition-colors duration-200 touch-target">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div id="messageBox" class="bg-white border border-border rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80">
+            <div id="messageIcon" class="flex-shrink-0"></div>
+            <div>
+                <p id="messageText" class="text-sm font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                headerTitle: "Quiz Assessment",
+                headerSubtitle: "Science - Grade 6",
+                languageText: "ਪੰਜਾਬੀ",
+                progressTitle: "Quiz Progress",
+                timerLabel: "Time Remaining",
+                progressStart: "Start",
+                progressEnd: "Complete",
+                questionType: "Multiple Choice",
+                previousBtnText: "Previous",
+                nextBtnText: "Next Question",
+                submitBtnText: "Submit Quiz",
+                reviewBtnText: "Review Answers",
+                modalTitle: "Submit Quiz?",
+                modalMessage: "Are you sure you want to submit your quiz? You won't be able to change your answers after submission.",
+                modalCancel: "Cancel",
+                modalConfirm: "Submit"
+            },
+            pa: {
+                headerTitle: "ਕੁਇਜ਼ ਮੁਲਾਂਕਣ",
+                headerSubtitle: "ਵਿਗਿਆਨ - ਕਲਾਸ 6",
+                languageText: "English",
+                progressTitle: "ਕੁਇਜ਼ ਪ੍ਰਗਤੀ",
+                timerLabel: "ਬਾਕੀ ਸਮਾਂ",
+                progressStart: "ਸ਼ੁਰੂ",
+                progressEnd: "ਪੂਰਾ",
+                questionType: "ਬਹੁ ਵਿਕਲਪ",
+                previousBtnText: "ਪਿਛਲਾ",
+                nextBtnText: "ਅਗਲਾ ਸਵਾਲ",
+                submitBtnText: "ਕੁਇਜ਼ ਜਮ੍ਹਾਂ ਕਰੋ",
+                reviewBtnText: "ਜਵਾਬ ਦੇਖੋ",
+                modalTitle: "ਕੁਇਜ਼ ਜਮ੍ਹਾਂ ਕਰਨਾ?",
+                modalMessage: "ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਆਪਣੀ ਕੁਇਜ਼ ਜਮ੍ਹਾਂ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਜਮ੍ਹਾਂ ਕਰਨ ਤੋਂ ਬਾਅਦ ਤੁਸੀਂ ਆਪਣੇ ਜਵਾਬ ਨਹੀਂ ਬਦਲ ਸਕੋਗੇ।",
+                modalCancel: "ਰੱਦ ਕਰੋ",
+                modalConfirm: "ਜਮ੍ਹਾਂ ਕਰੋ"
+            }
+        };
+
+        // Quiz data
+        const quizData = {
+            en: [
+                {
+                    question: "What is the process by which plants make their own food using sunlight?",
+                    options: ["Photosynthesis", "Respiration", "Digestion", "Circulation"],
+                    correct: "A",
+                    explanation: "Photosynthesis is the process where plants use sunlight, water, and carbon dioxide to make glucose and oxygen."
+                },
+                {
+                    question: "Which planet is known as the Red Planet?",
+                    options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                    correct: "B",
+                    explanation: "Mars is called the Red Planet because of its reddish appearance due to iron oxide on its surface."
+                },
+                {
+                    question: "What is the smallest unit of matter?",
+                    options: ["Molecule", "Atom", "Cell", "Electron"],
+                    correct: "B",
+                    explanation: "An atom is the smallest unit of matter that retains the properties of an element."
+                },
+                {
+                    question: "Which gas do plants absorb from the atmosphere during photosynthesis?",
+                    options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+                    correct: "C",
+                    explanation: "Plants absorb carbon dioxide from the atmosphere and use it in photosynthesis to make food."
+                },
+                {
+                    question: "What is the center of our solar system?",
+                    options: ["Earth", "Moon", "Sun", "Jupiter"],
+                    correct: "C",
+                    explanation: "The Sun is at the center of our solar system and all planets orbit around it."
+                },
+                {
+                    question: "Which organ in the human body pumps blood?",
+                    options: ["Lungs", "Heart", "Liver", "Kidney"],
+                    correct: "B",
+                    explanation: "The heart is a muscular organ that pumps blood throughout the body."
+                },
+                {
+                    question: "What do we call animals that eat only plants?",
+                    options: ["Carnivores", "Omnivores", "Herbivores", "Predators"],
+                    correct: "C",
+                    explanation: "Herbivores are animals that eat only plants and plant materials."
+                },
+                {
+                    question: "Which state of matter has a definite shape and volume?",
+                    options: ["Gas", "Liquid", "Solid", "Plasma"],
+                    correct: "C",
+                    explanation: "Solids have both definite shape and definite volume because their particles are tightly packed."
+                },
+                {
+                    question: "What is the process of water changing from liquid to gas called?",
+                    options: ["Condensation", "Evaporation", "Freezing", "Melting"],
+                    correct: "B",
+                    explanation: "Evaporation is the process where water changes from liquid state to gas state."
+                },
+                {
+                    question: "Which force pulls objects toward the Earth?",
+                    options: ["Magnetism", "Friction", "Gravity", "Electricity"],
+                    correct: "C",
+                    explanation: "Gravity is the force that pulls all objects toward the center of the Earth."
+                }
+            ],
+            pa: [
+                {
+                    question: "ਪੌਧੇ ਸੂਰਜ ਦੀ ਰੌਸ਼ਨੀ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਆਪਣਾ ਭੋਜਨ ਬਣਾਉਣ ਦੀ ਪ੍ਰਕਿਰਿਆ ਨੂੰ ਕੀ ਕਹਿੰਦੇ ਹਨ?",
+                    options: ["ਪ੍ਰਕਾਸ਼ ਸੰਸ਼ਲੇਸ਼ਣ", "ਸਾਹ ਲੈਣਾ", "ਪਾਚਨ", "ਸੰਚਾਰ"],
+                    correct: "A",
+                    explanation: "ਪ੍ਰਕਾਸ਼ ਸੰਸ਼ਲੇਸ਼ਣ ਉਹ ਪ੍ਰਕਿਰਿਆ ਹੈ ਜਿਸ ਵਿੱਚ ਪੌਧੇ ਸੂਰਜ ਦੀ ਰੌਸ਼ਨੀ, ਪਾਣੀ ਅਤੇ ਕਾਰਬਨ ਡਾਈਆਕਸਾਈਡ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਗਲੂਕੋਜ਼ ਅਤੇ ਆਕਸੀਜਨ ਬਣਾਉਂਦੇ ਹਨ।"
+                },
+                {
+                    question: "ਕਿਹੜੇ ਗ੍ਰਹਿ ਨੂੰ ਲਾਲ ਗ੍ਰਹਿ ਕਿਹਾ ਜਾਂਦਾ ਹੈ?",
+                    options: ["ਸ਼ੁੱਕਰ", "ਮੰਗਲ", "ਬ੍ਰਹਿਸਪਤੀ", "ਸ਼ਨੀ"],
+                    correct: "B",
+                    explanation: "ਮੰਗਲ ਨੂੰ ਲਾਲ ਗ੍ਰਹਿ ਕਿਹਾ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਇਸਦੀ ਸਤਹ 'ਤੇ ਆਇਰਨ ਆਕਸਾਈਡ ਕਾਰਨ ਇਹ ਲਾਲ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ।"
+                },
+                {
+                    question: "ਪਦਾਰਥ ਦੀ ਸਭ ਤੋਂ ਛੋਟੀ ਇਕਾਈ ਕੀ ਹੈ?",
+                    options: ["ਅਣੂ", "ਪਰਮਾਣੂ", "ਸੈੱਲ", "ਇਲੈਕਟ੍ਰਾਨ"],
+                    correct: "B",
+                    explanation: "ਪਰਮਾਣੂ ਪਦਾਰਥ ਦੀ ਸਭ ਤੋਂ ਛੋਟੀ ਇਕਾਈ ਹੈ ਜੋ ਤੱਤ ਦੇ ਗੁਣਾਂ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੀ ਹੈ।"
+                },
+                {
+                    question: "ਪ੍ਰਕਾਸ਼ ਸੰਸ਼ਲੇਸ਼ਣ ਦੌਰਾਨ ਪੌਧੇ ਵਾਯੂਮੰਡਲ ਤੋਂ ਕਿਹੜੀ ਗੈਸ ਸੋਖਦੇ ਹਨ?",
+                    options: ["ਆਕਸੀਜਨ", "ਨਾਈਟ੍ਰੋਜਨ", "ਕਾਰਬਨ ਡਾਈਆਕਸਾਈਡ", "ਹਾਈਡ੍ਰੋਜਨ"],
+                    correct: "C",
+                    explanation: "ਪੌਧੇ ਵਾਯੂਮੰਡਲ ਤੋਂ ਕਾਰਬਨ ਡਾਈਆਕਸਾਈਡ ਸੋਖਦੇ ਹਨ ਅਤੇ ਇਸਦੀ ਵਰਤੋਂ ਪ੍ਰਕਾਸ਼ ਸੰਸ਼ਲੇਸ਼ਣ ਵਿੱਚ ਭੋਜਨ ਬਣਾਉਣ ਲਈ ਕਰਦੇ ਹਨ।"
+                },
+                {
+                    question: "ਸਾਡੇ ਸੂਰਜੀ ਮੰਡਲ ਦਾ ਕੇਂਦਰ ਕੀ ਹੈ?",
+                    options: ["ਧਰਤੀ", "ਚੰਦ", "ਸੂਰਜ", "ਬ੍ਰਹਿਸਪਤੀ"],
+                    correct: "C",
+                    explanation: "ਸੂਰਜ ਸਾਡੇ ਸੂਰਜੀ ਮੰਡਲ ਦੇ ਕੇਂਦਰ ਵਿੱਚ ਹੈ ਅਤੇ ਸਾਰੇ ਗ੍ਰਹਿ ਇਸਦੇ ਦੁਆਲੇ ਚੱਕਰ ਲਗਾਉਂਦੇ ਹਨ।"
+                },
+                {
+                    question: "ਮਨੁੱਖੀ ਸਰੀਰ ਵਿੱਚ ਕਿਹੜਾ ਅੰਗ ਖੂਨ ਪੰਪ ਕਰਦਾ ਹੈ?",
+                    options: ["ਫੇਫੜੇ", "ਦਿਲ", "ਜਿਗਰ", "ਗੁਰਦਾ"],
+                    correct: "B",
+                    explanation: "ਦਿਲ ਇੱਕ ਮਾਸਪੇਸ਼ੀ ਅੰਗ ਹੈ ਜੋ ਸਾਰੇ ਸਰੀਰ ਵਿੱਚ ਖੂਨ ਪੰਪ ਕਰਦਾ ਹੈ।"
+                },
+                {
+                    question: "ਸਿਰਫ ਪੌਧੇ ਖਾਣ ਵਾਲੇ ਜਾਨਵਰਾਂ ਨੂੰ ਕੀ ਕਹਿੰਦੇ ਹਨ?",
+                    options: ["ਮਾਸਾਹਾਰੀ", "ਸਰਬਾਹਾਰੀ", "ਸ਼ਾਕਾਹਾਰੀ", "ਸ਼ਿਕਾਰੀ"],
+                    correct: "C",
+                    explanation: "ਸ਼ਾਕਾਹਾਰੀ ਉਹ ਜਾਨਵਰ ਹਨ ਜੋ ਸਿਰਫ ਪੌਧੇ ਅਤੇ ਪੌਧਿਆਂ ਦੀ ਸਮੱਗਰੀ ਖਾਂਦੇ ਹਨ।"
+                },
+                {
+                    question: "ਪਦਾਰਥ ਦੀ ਕਿਹੜੀ ਅਵਸਥਾ ਦਾ ਨਿਸ਼ਚਿਤ ਆਕਾਰ ਅਤੇ ਆਇਤਨ ਹੁੰਦਾ ਹੈ?",
+                    options: ["ਗੈਸ", "ਤਰਲ", "ਠੋਸ", "ਪਲਾਜ਼ਮਾ"],
+                    correct: "C",
+                    explanation: "ਠੋਸ ਪਦਾਰਥਾਂ ਦਾ ਨਿਸ਼ਚਿਤ ਆਕਾਰ ਅਤੇ ਆਇਤਨ ਹੁੰਦਾ ਹੈ ਕਿਉਂਕਿ ਇਨ੍ਹਾਂ ਦੇ ਕਣ ਕੱਸ ਕੇ ਪੈਕ ਹੁੰਦੇ ਹਨ।"
+                },
+                {
+                    question: "ਪਾਣੀ ਦੇ ਤਰਲ ਤੋਂ ਗੈਸ ਵਿੱਚ ਬਦਲਣ ਦੀ ਪ੍ਰਕਿਰਿਆ ਨੂੰ ਕੀ ਕਹਿੰਦੇ ਹਨ?",
+                    options: ["ਸੰਘਣਨ", "ਵਾਸ਼ਪੀਕਰਨ", "ਜੰਮਣਾ", "ਪਿਘਲਣਾ"],
+                    correct: "B",
+                    explanation: "ਵਾਸ਼ਪੀਕਰਨ ਉਹ ਪ੍ਰਕਿਰਿਆ ਹੈ ਜਿਸ ਵਿੱਚ ਪਾਣੀ ਤਰਲ ਅਵਸਥਾ ਤੋਂ ਗੈਸ ਅਵਸਥਾ ਵਿੱਚ ਬਦਲਦਾ ਹੈ।"
+                },
+                {
+                    question: "ਕਿਹੜੀ ਸ਼ਕਤੀ ਵਸਤੂਆਂ ਨੂੰ ਧਰਤੀ ਵੱਲ ਖਿੱਚਦੀ ਹੈ?",
+                    options: ["ਚੁੰਬਕਤਾ", "ਰਗੜ", "ਗੁਰੂਤਾਕਰਸ਼ਣ", "ਬਿਜਲੀ"],
+                    correct: "C",
+                    explanation: "ਗੁਰੂਤਾਕਰਸ਼ਣ ਉਹ ਸ਼ਕਤੀ ਹੈ ਜੋ ਸਾਰੀਆਂ ਵਸਤੂਆਂ ਨੂੰ ਧਰਤੀ ਦੇ ਕੇਂਦਰ ਵੱਲ ਖਿੱਚਦੀ ਹੈ।"
+                }
+            ]
+        };
+
+        let currentLanguage = 'en';
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let quizStartTime = Date.now();
+        let timerInterval;
+        let timeRemaining = 15 * 60; // 15 minutes in seconds
+
+        // Initialize quiz
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeQuiz();
+            startTimer();
+            loadQuestion();
+        });
+
+        // Language toggle functionality
+        document.getElementById('languageToggle').addEventListener('click', function() {
+            currentLanguage = currentLanguage === 'en' ? 'pa' : 'en';
+            updateLanguage();
+            loadQuestion(); // Reload current question in new language
+        });
+
+        function updateLanguage() {
+            const elements = translations[currentLanguage];
+            
+            Object.keys(elements).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = elements[key];
+                    if (currentLanguage === 'pa') {
+                        element.classList.add('punjabi-text');
+                    } else {
+                        element.classList.remove('punjabi-text');
+                    }
+                }
+            });
+        }
+
+        function initializeQuiz() {
+            // Initialize user answers array
+            userAnswers = {};
+            
+            // Set up event listeners
+            document.getElementById('previousBtn').addEventListener('click', previousQuestion);
+            document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+            document.getElementById('submitBtn').addEventListener('click', showConfirmationModal);
+            document.getElementById('reviewBtn').addEventListener('click', reviewAnswers);
+            
+            // Modal event listeners
+            document.getElementById('modalCancel').addEventListener('click', hideConfirmationModal);
+            document.getElementById('modalConfirm').addEventListener('click', submitQuiz);
+            
+            // Answer selection listeners
+            const radioButtons = document.querySelectorAll('input[name="answer"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', handleAnswerSelection);
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 300) { // 5 minutes warning
+                    document.getElementById('timerDisplay').classList.add('timer-warning', 'text-warning-600');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+        }
+
+        function loadQuestion() {
+            const currentQuiz = quizData[currentLanguage];
+            const question = currentQuiz[currentQuestionIndex];
+            
+            // Update question counter
+            document.getElementById('questionCounter').textContent = 
+                currentLanguage === 'en' 
+                    ? `Question ${currentQuestionIndex + 1} of ${currentQuiz.length}`
+                    : `ਸਵਾਲ ${currentQuestionIndex + 1} ਦੇ ${currentQuiz.length}`;
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            
+            // Update question text
+            document.getElementById('questionText').textContent = question.question;
+            if (currentLanguage === 'pa') {
+                document.getElementById('questionText').classList.add('punjabi-text');
+            } else {
+                document.getElementById('questionText').classList.remove('punjabi-text');
+            }
+            
+            // Update options
+            const optionElements = ['optionA', 'optionB', 'optionC', 'optionD'];
+            optionElements.forEach((elementId, index) => {
+                const element = document.getElementById(elementId);
+                element.textContent = question.options[index];
+                if (currentLanguage === 'pa') {
+                    element.classList.add('punjabi-text');
+                } else {
+                    element.classList.remove('punjabi-text');
+                }
+            });
+            
+            // Clear previous selections
+            const radioButtons = document.querySelectorAll('input[name="answer"]');
+            radioButtons.forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Restore user's previous answer if exists
+            if (userAnswers[currentQuestionIndex]) {
+                const savedAnswer = userAnswers[currentQuestionIndex];
+                const radioToCheck = document.querySelector(`input[name="answer"][value="${savedAnswer}"]`);
+                if (radioToCheck) {
+                    radioToCheck.checked = true;
+                    updateOptionStyles();
+                }
+            }
+            
+            // Update navigation buttons
+            updateNavigationButtons();
+            
+            // Hide feedback
+            document.getElementById('answerFeedback').classList.add('hidden');
+        }
+
+        function handleAnswerSelection(event) {
+            const selectedValue = event.target.value;
+            userAnswers[currentQuestionIndex] = selectedValue;
+            
+            updateOptionStyles();
+            updateNavigationButtons();
+            
+            // Save progress to localStorage
+            localStorage.setItem('quizProgress', JSON.stringify({
+                currentQuestionIndex,
+                userAnswers,
+                timeRemaining,
+                language: currentLanguage
+            }));
+        }
+
+        function updateOptionStyles() {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => {
+                const radio = option.querySelector('input[type="radio"]');
+                if (radio.checked) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateNavigationButtons() {
+            const totalQuestions = quizData[currentLanguage].length;
+            const previousBtn = document.getElementById('previousBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Previous button
+            previousBtn.disabled = currentQuestionIndex === 0;
+            
+            // Next/Submit button logic
+            const hasAnswer = userAnswers[currentQuestionIndex] !== undefined;
+            
+            if (currentQuestionIndex === totalQuestions - 1) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+                submitBtn.disabled = !hasAnswer;
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+                nextBtn.disabled = !hasAnswer;
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            const totalQuestions = quizData[currentLanguage].length;
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function reviewAnswers() {
+            // Show review modal or navigate to review page
+            showMessage('Review functionality will be implemented in the next version.', 'info');
+        }
+
+        function showConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('hidden');
+        }
+
+        function hideConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('hidden');
+        }
+
+        function submitQuiz() {
+            hideConfirmationModal();
+            clearInterval(timerInterval);
+            
+            // Calculate score
+            const currentQuiz = quizData[currentLanguage];
+            let correctAnswers = 0;
+            
+            currentQuiz.forEach((question, index) => {
+                if (userAnswers[index] === question.correct) {
+                    correctAnswers++;
+                }
+            });
+            
+            const score = Math.round((correctAnswers / currentQuiz.length) * 100);
+            const timeTaken = Math.round((Date.now() - quizStartTime) / 1000);
+            
+            // Store results
+            const quizResults = {
+                score: score,
+                correctAnswers: correctAnswers,
+                totalQuestions: currentQuiz.length,
+                timeTaken: timeTaken,
+                userAnswers: userAnswers,
+                quizData: currentQuiz,
+                language: currentLanguage,
+                completedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('quizResults', JSON.stringify(quizResults));
+            localStorage.removeItem('quizProgress'); // Clear progress
+            
+            showMessage('Quiz submitted successfully! Redirecting to results...', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'quiz_results.html';
+            }, 2000);
+        }
+
+        function autoSubmitQuiz() {
+            showMessage('Time is up! Quiz will be submitted automatically.', 'warning');
+            setTimeout(() => {
+                submitQuiz();
+            }, 3000);
+        }
+
+        function showMessage(text, type) {
+            const container = document.getElementById('messageContainer');
+            const messageBox = document.getElementById('messageBox');
+            const messageIcon = document.getElementById('messageIcon');
+            const messageText = document.getElementById('messageText');
+
+            messageText.textContent = text;
+
+            if (type === 'success') {
+                messageBox.className = 'bg-success-50 border border-success-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-success-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-success-800';
+            } else if (type === 'warning') {
+                messageBox.className = 'bg-warning-50 border border-warning-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-warning-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-warning-800';
+            } else if (type === 'info') {
+                messageBox.className = 'bg-accent-50 border border-accent-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-accent-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-accent-800';
+            } else {
+                messageBox.className = 'bg-error-50 border border-error-200 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-80';
+                messageIcon.innerHTML = '<svg class="w-5 h-5 text-error-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                messageText.className = 'text-sm font-medium text-error-800';
+            }
+
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Load saved progress on page load
+        window.addEventListener('load', function() {
+            const savedProgress = localStorage.getItem('quizProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                currentQuestionIndex = progress.currentQuestionIndex || 0;
+                userAnswers = progress.userAnswers || {};
+                timeRemaining = progress.timeRemaining || 15 * 60;
+                currentLanguage = progress.language || 'en';
+                
+                updateLanguage();
+                loadQuestion();
+            }
+        });
+
+        // Prevent accidental page refresh
+        window.addEventListener('beforeunload', function(e) {
+            if (Object.keys(userAnswers).length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>
